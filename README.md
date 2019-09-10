@@ -29,8 +29,17 @@ If a project uses [kube2iam](https://github.com/jtblin/kube2iam) one can use `ia
 
 `kube-asg-node-drainer` release must be installed to `kube-system` namespace: pods with system-node-critical priorityClass are not permitted in any other space.
 
+Option 1:
+
 ```
 helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
+```
+
+Option 2: 
+
+```
+helm add repo kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/
+helm install --name kube-asg-node-drainer --namespace kube-system kube-asg-node-drainer/kube-asg-node-drainer
 ```
 
 ### History
