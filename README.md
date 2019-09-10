@@ -26,10 +26,12 @@ aws cloudformation deploy --template-file cf/noderole.yml --stack-name kube-asg-
 If a project uses [kube2iam](https://github.com/jtblin/kube2iam) one can use `iamRole` in `values.yml` to assign an IAM Role to the `kube-asg-node-drainer` pods.
 
 ### 4. Install
-First we need to add a repository to our list:
 
-```helm repo add activemq-artemis https://vromero.github.io/activemq-artemis-helm/```
+`kube-asg-node-drainer` release must be installed to `kube-system` namespace: pods with system-node-critical priorityClass are not permitted in any other space.
 
+```
+helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
+```
 
 ### History
 
