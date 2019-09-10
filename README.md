@@ -1,16 +1,16 @@
 ## AWS ASG rebalancing node drainer
 
-### Why 
+### 1. Why 
 A workaround for rebalancing feature of ASG https://github.com/kubernetes/autoscaler/blob/master/cluster-autoscaler/cloudprovider/aws/README.md#common-notes-and-gotchas. 
 More in https://chrisdodds.net/kubernetes-ec2-autoscaling-for-fun-and-profit/ on why the official "fix" sucks. 
 
-### What
+### 2. What
 
 * Based on [kube-aws deployment](https://github.com/kubernetes-incubator/kube-aws/blob/2f7e360421bc32c839e1acd31e8d0f082dfdab1e/builtin/files/userdata/cloud-config-controller#L1104) and [kube-aws resources](https://github.com/kubernetes-incubator/kube-aws/blob/2f7e360421bc32c839e1acd31e8d0f082dfdab1e/builtin/files/userdata/cloud-config-controller#L2658).
 * Transformed into a helm chart to be effectively used in any EKS cluster.
 * The final solution gracefully evicts pods - even single replicas or deployments without PDB - with `kubectl rollout restart`.
 
-### AWS InfraStructure Setup
+### 3. Prerequisites - AWS InfraStructure Setup
 
 ASG must provide a lifecycle hook `kube-asg-node-drainer` to let the node drainer script complete the POD eviction:
 
@@ -25,8 +25,10 @@ aws cloudformation deploy --template-file cf/noderole.yml --stack-name kube-asg-
 
 If a project uses [kube2iam](https://github.com/jtblin/kube2iam) one can use `iamRole` in `values.yml` to assign an IAM Role to the `kube-asg-node-drainer` pods.
 
-### Install
+### 4. Install
+First we need to add a repository to our list:
 
+```helm repo add activemq-artemis https://vromero.github.io/activemq-artemis-helm/```
 
 
 ### History
