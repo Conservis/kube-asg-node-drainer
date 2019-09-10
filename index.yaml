@@ -1,3 +1,16 @@
 apiVersion: v1
-entries: {}
-generated: 2019-09-10T11:15:02.04042-05:00
+entries:
+  kube-asg-node-drainer:
+  - apiVersion: v1
+    appVersion: 1.15.3
+    created: 2019-09-10T11:18:53.136256-05:00
+    description: AWS node drainer for ASG spanning over multiple AZs - a workaround
+      for a common pitfall https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas.
+      Another option would be https://github.com/aws-samples/amazon-k8s-node-drainer
+      but it relies on server API whereas `kubectl rollout` is 1.15+ command.
+    digest: e5f8fd890ba74610c85d396bcad21def2e3b8d80d1ae7cda01b0f1ee93ed74fb
+    name: kube-asg-node-drainer
+    urls:
+    - https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
+    version: 1.0.0
+generated: 2019-09-10T11:18:53.135653-05:00
