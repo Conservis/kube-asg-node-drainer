@@ -1,5 +1,0 @@
-#!/bin/sh
-# Hyperkube binary is not statically linked, so we need to use
-# the musl interpreter to be able to run it in this image
-# See: https://github.com/kubernetes-incubator/kube-aws/pull/674#discussion_r118889687
-/lib/ld-musl-x86_64.so.1 /opt/bin/hyperkube kubectl "$@"
