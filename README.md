@@ -48,9 +48,11 @@ https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudpro
 
 ```
 Cluster autoscaler does not support Auto Scaling Groups which span multiple Availability Zones;
-instead you should use an Auto Scaling Group for each Availability Zone and enable the --balance-similar-node-groups feature. 
+instead you should use an Auto Scaling Group for each Availability Zone 
+and enable the --balance-similar-node-groups feature. 
 If you do use a single Auto Scaling Group that spans multiple Availability Zones 
-you will find that AWS unexpectedly terminates nodes without them being drained because of the rebalancing feature.
+you will find that AWS unexpectedly terminates nodes without them being drained 
+because of the rebalancing feature.
 ```
 
 The official approach is kind of ugly and introduces more scaling and load-balancer complexity on the AWS side and is considered suboptimal. 
