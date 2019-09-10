@@ -1,0 +1,65 @@
+apiVersion: rbac.authorization.k8s.io/v1
+kind: ClusterRole
+metadata:
+  labels:
+    app: {{ template "name" . }}
+    release: {{ template "name" . }}
+    heritage: "{{ .Release.Service }}"
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace}}
+rules:
+  - apiGroups:
+      - ""
+    resources:
+      - configmaps
+    verbs:
+      - create
+  - apiGroups:
+      - ""
+    resourceNames:
+      - kube-node-drainer-status
+    resources:
+      - configmaps
+    verbs:
+      - get
+      - delete
+      - update
+      - patch
+  - apiGroups:
+      - ""
+    resources:
+      - nodes
+      - pods
+    verbs:
+      - get
+      - list
+      - watch
+      - patch
+  - apiGroups:
+      - "extensions"
+    resources:
+      - daemonsets
+      - replicasets
+      - deployments
+    verbs:
+      - get
+      - list
+  - apiGroups:
+      - "extensions"
+    resources:
+      - deployments
+    verbs:
+      - patch
+      - watch
+  - apiGroups:
+      - ""
+    resources:
+      - pods/eviction
+    verbs:
+      - create
+  - apiGroups:
+      - "apps"
+    resources:
+      - daemonsets
+    verbs:
+      - get

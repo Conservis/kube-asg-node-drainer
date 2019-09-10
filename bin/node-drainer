@@ -1,0 +1,72 @@
+#!/bin/bash -xe
+metadata() { curl -s -S -f http://169.254.169.254/2016-09-02/"$1"; }
+asg() { aws --region="${REGION}" autoscaling "$@"; }
+
+# gracefully move pods to a different node, no PDB or multiple replicas needed
+prepare_for_drain() {
+  # prevent new pods to be scheduled on this node
+  kubectl cordon "${NODE_NAME}"
+  local replica_sets=$(kubectl get pods -A --field-selector spec.nodeName="${NODE_NAME}" -o json | jq -r -c '[.items[] | select(.status.phase=="Running") | .metadata.ownerReferences[] | select(.kind=="ReplicaSet") | .name]')
+  local deployments=$(kubectl get replicasets -A -o json | jq --arg replica_sets "${replica_sets}" -r '[.items[].metadata | select(.ownerReferences[].kind=="Deployment") | select( .name as $a | $replica_sets | index($a) ) | .ownerReferences[].name] | join(",")')
+  # trigger a deployment restart to gracefully move pod from this node to another
+  for deploy in ${deployments//,/ }; do
+    ns="$(kubectl get deployment -A --field-selector metadata.name=${deploy} -o json | jq -r '.items[0].metadata.namespace')"
+    kubectl --namespace ${ns}  rollout restart deployment/${deploy}
+  done
+
+  for deploy in ${deployments//,/ }; do
+    ns="$(kubectl get deployment -A --field-selector metadata.name=${deploy} -o json | jq -r '.items[0].metadata.namespace')"
+    kubectl --namespace ${ns} rollout status --timeout 10m deployment/${deploy} || true # ignore any restart errors
+  done
+}
+
+[ -n "${NODE_NAME}" ]
+ASG_LIFECYCLE_HOOK_NAME=${ASG_LIFECYCLE_HOOK_NAME:-kube-asg-node-drainer}
+INSTANCE_ID=$(metadata meta-data/instance-id)
+REGION=$(metadata dynamic/instance-identity/document | jq -r .region)
+[ -n "${REGION}" ]
+
+# Not customizable, for now
+POLL_INTERVAL=10
+
+# Used to identify the source which requested the instance termination
+termination_source=''
+
+# Instance termination detection loop
+while sleep ${POLL_INTERVAL}; do
+
+  # Spot instance termination check
+  http_status=$(curl -o /dev/null -w '%{http_code}' -sL http://169.254.169.254/latest/meta-data/spot/termination-time)
+  if [ "${http_status}" -eq 200 ]; then
+    termination_source=spot
+    break
+  fi
+
+  # Termination ConfigMap check
+  if [ -e /etc/kube-node-drainer/asg ] && grep -q "${INSTANCE_ID}" /etc/kube-node-drainer/asg; then
+    termination_source=asg
+    break
+  fi
+done
+
+# Node draining loop
+while true; do
+  echo Node is terminating, draining it...
+  prepare_for_drain
+  # by this time all evictable pods should leave this node
+  if ! kubectl drain --ignore-daemonsets=true --delete-local-data=true --force=true --timeout=60s "${NODE_NAME}"; then
+    echo Not all pods on this host can be evicted, will try again
+    continue
+  fi
+  echo All evictable pods are gone
+
+  if [ "${termination_source}" == asg ]; then
+    echo Notifying AutoScalingGroup that instance ${INSTANCE_ID} can be shutdown
+    ASG_NAME=$(asg describe-auto-scaling-instances --instance-ids "${INSTANCE_ID}" | jq -r '.AutoScalingInstances[].AutoScalingGroupName')
+    HOOK_NAME=$(asg describe-lifecycle-hooks --auto-scaling-group-name "${ASG_NAME}" | jq -r '.LifecycleHooks[].LifecycleHookName' | grep -i "${ASG_LIFECYCLE_HOOK_NAME}")
+    asg complete-lifecycle-action --lifecycle-action-result CONTINUE --instance-id "${INSTANCE_ID}" --lifecycle-hook-name "${HOOK_NAME}" --auto-scaling-group-name "${ASG_NAME}"
+  fi
+
+  # Expect instance will be shut down in 5 minutes
+  sleep 300
+done

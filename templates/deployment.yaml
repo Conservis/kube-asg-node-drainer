@@ -1,0 +1,32 @@
+# original file name kube-node-drainer-asg-status-updater-de.yaml
+kind: Deployment
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ template "name" . }}-status-updater
+  namespace: {{ .Release.Namespace}}
+  labels:
+    k8s-app: {{ template "name" . }}-status-updater
+spec:
+  replicas: 1
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ template "name" . }}-status-updater
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+        {{if ne .Values.iamRole "" -}}
+        iam.amazonaws.com/role: {{ .Values.iamRole }}
+    {{ end }}
+    spec:
+      serviceAccountName: {{ template "name" . }}
+      priorityClassName: system-node-critical
+      containers:
+        - name: {{ template "name" . }}-status-updater
+          image: {{.Values.image}}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+          command:
+            - /usr/local/bin/asg-configmap-updater

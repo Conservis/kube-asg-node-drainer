@@ -1,0 +1,7 @@
+version: '3.4'
+
+services:
+  kube-drainer:
+    image: ${PROJECT_NAME:-kube-asg-node-drainer}:${CI_BUILD_TAG:-edge}
+    build:
+      context: .

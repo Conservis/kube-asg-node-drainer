@@ -1,0 +1,52 @@
+# original file name kube-node-drainer-ds.yaml
+kind: DaemonSet
+apiVersion: extensions/v1beta1
+metadata:
+  name: {{ template "name" . }}
+  namespace: {{ .Release.Namespace}}
+  labels:
+    k8s-app: {{ template "name" . }}
+spec:
+  updateStrategy:
+    rollingUpdate:
+      maxUnavailable: 100%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        k8s-app: {{ template "name" . }}
+      annotations:
+        scheduler.alpha.kubernetes.io/critical-pod: ''
+    spec:
+      serviceAccountName: {{ template "name" . }}
+      priorityClassName: system-node-critical
+      tolerations:
+        - operator: Exists
+          effect: NoSchedule
+        - operator: Exists
+          effect: NoExecute
+        - operator: Exists
+          key: CriticalAddonsOnly
+      containers:
+        - name: kube-node-drainer
+          image: {{.Values.image}}
+          env:
+            - name: NODE_NAME
+              valueFrom:
+                fieldRef:
+                  fieldPath: spec.nodeName
+            - name: ASG_LIFECYCLE_HOOK_NAME
+              value: {{ template "name" . }}
+          command:
+            - /usr/local/bin/node-drainer
+          volumeMounts:
+            - mountPath: /etc/kube-node-drainer
+              name: kube-node-drainer-status
+              readOnly: true
+      volumes:
+        - name: kube-node-drainer-status
+          projected:
+            sources:
+              - configMap:
+                  name: kube-node-drainer-status
+                  optional: true

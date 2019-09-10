@@ -1,0 +1,40 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'Amazon EKS - Drainer ASG Instance Role'
+
+Resources:
+
+  NodeInstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles: [!Ref NodeInstanceRole]
+
+  NodeInstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service:
+                - ec2.amazonaws.com
+            Action:
+              - sts:AssumeRole
+      Path: "/"
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy
+      Policies:
+        - PolicyName: kube-asg-node-drainer
+          PolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              - Sid: KubeAsgNodeDrainer
+                Effect: Allow
+                Action:
+                  - "autoscaling:DescribeAutoScalingInstances"
+                  - "autoscaling:DescribeLifecycleHooks"
+                  - "autoscaling:DescribeAutoScalingGroups"
+                  - "autoscaling:CompleteLifecycleAction"
+                Resource: ["*"]

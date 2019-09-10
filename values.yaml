@@ -1,0 +1,3 @@
+# Default values for chart.
+image: "kube-asg-node-drainer:edge"
+iamRole: ""
