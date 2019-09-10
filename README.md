@@ -55,9 +55,10 @@ you will find that AWS unexpectedly terminates nodes without them being drained 
 
 The official approach is kind of ugly and introduces more scaling and load-balancer complexity on the AWS side and is considered suboptimal. 
 
-Another approach is to have a life cycle hook which drains the nodes once the rebalancing occurs:
+Another approach is to have a life cycle hook which drains the nodes once the rebalancing occurs. Known implementations so far:
 * [AWS Lambda](https://github.com/aws-samples/amazon-k8s-node-drainer) solution
 * [Custom daemonset](https://github.com/kubernetes-incubator/kube-aws/blob/2f7e360421bc32c839e1acd31e8d0f082dfdab1e/builtin/files/userdata/cloud-config-controller#L2658)
+* https://github.com/rebuy-de/node-drainer
 
 Any of this solution will face the issue with draining node/evicting a pod because if a deployment has a single replica there still will be downtime to the app. PodDisruptionBudget won’t help in this case because of https://github.com/kubernetes/kubernetes/issues/66811. This limitation is best described in https://github.com/kubernetes/kubernetes/issues/66811#issuecomment-517219951. 
 
