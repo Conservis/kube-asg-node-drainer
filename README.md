@@ -12,7 +12,7 @@ More in https://chrisdodds.net/kubernetes-ec2-autoscaling-for-fun-and-profit/ on
 
 ### 3. Prerequisites - AWS InfraStructure Setup
 
-ASG must provide a lifecycle hook `kube-asg-node-drainer` to let the node drainer script complete the POD eviction:
+ASG must provide a lifecycle hook `kube-asg-node-drainer` to let the node drainer script notify ASG after completing the POD eviction:
 
 ```
 aws cloudformation deploy --template-file cf/lifecyclehook.yml --stack-name kube-asg-node-drainer-hook --parameter-overrides AsgName=<YOUR_ASG_NAME>
