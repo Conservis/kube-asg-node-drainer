@@ -42,6 +42,21 @@ helm add repo kube-asg-node-drainer https://conservis.github.io/kube-asg-node-dr
 helm install --name kube-asg-node-drainer --namespace kube-system kube-asg-node-drainer/kube-asg-node-drainer
 ```
 
+### 5. Test
+How to test that things work:
+* decrease `Desired Capacity` of your ASG
+* some of the instances will be marked as `Terminating:Wait`
+* `kube-asg-node-drainer` will start gracefully evicting the pods
+* autoscaler will change `Desired Capacity` back to original value
+* pods will move from terminating instances to new ones
+
+During that period one can verify that the app didn't go down by something like:
+
+```
+while true; do date; curl <app_health_check>; echo ''; sleep 5; done
+
+```
+
 ### History
 
 https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas, second notice:
