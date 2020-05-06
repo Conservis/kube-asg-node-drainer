@@ -32,15 +32,21 @@ If a project uses [kube2iam](https://github.com/jtblin/kube2iam) one can use `ia
 Option 1:
 
 ```
-helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
+helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-<version>.tgz
 ```
 
 Option 2: 
 
 ```
-helm add repo kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/
-helm install --name kube-asg-node-drainer --namespace kube-system kube-asg-node-drainer/kube-asg-node-drainer
+helm repo add conservis https://conservis.github.io/kube-asg-node-drainer/
+helm install --name kube-asg-node-drainer --namespace kube-system conservis/kube-asg-node-drainer
 ```
+
+| kube-asg-node-drainer version  | Kubernetes versions             | 
+|--------------------------------|---------------------------------|
+| 1.0.x                          | 1.15.x - 1.12.x                 |
+| 1.16.x                         | 1.16.x                          |
+
 
 ### 5. Test
 How to test that things work:

@@ -2,16 +2,16 @@ apiVersion: rbac.authorization.k8s.io/v1beta1
 kind: ClusterRoleBinding
 metadata:
   labels:
-    app: {{ template "name" . }}
-    release: {{ template "name" . }}
+    app: {{ template "kube-asg-node-drainer.name" . }}
+    release: {{ template "kube-asg-node-drainer.name" . }}
     heritage: "{{ .Release.Service }}"
-  name: {{ template "name" . }}
+  name: {{ template "kube-asg-node-drainer.name" . }}
   namespace: {{ .Release.Namespace}}
 roleRef:
   kind: ClusterRole
-  name: {{ template "name" . }}
+  name: {{ template "kube-asg-node-drainer.name" . }}
   apiGroup: rbac.authorization.k8s.io
 subjects:
   - kind: ServiceAccount
-    name: {{ template "name" . }}
+    name: {{ template "kube-asg-node-drainer.name" . }}
     namespace: {{ .Release.Namespace}}
