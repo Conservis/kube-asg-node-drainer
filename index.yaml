@@ -2,8 +2,19 @@ apiVersion: v1
 entries:
   kube-asg-node-drainer:
   - apiVersion: v1
+    appVersion: 1.16.0
+    created: "2020-05-06T10:52:36.19164-05:00"
+    description: AWS node drainer for ASG spanning over multiple AZs - a workaround
+      for a common pitfall https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas.
+      Based on `kubectl rollout` CLI. Another option would be https://github.com/aws-samples/amazon-k8s-node-drainer.
+    digest: 4fed1402977271e730813c05a9a1ccf1d4aecb95a6abbb7c467c24d77447ebe0
+    name: kube-asg-node-drainer
+    urls:
+    - https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.16.0.tgz
+    version: 1.16.0
+  - apiVersion: v1
     appVersion: 1.15.3
-    created: 2019-09-10T13:45:15.761696-05:00
+    created: "2020-05-06T10:52:36.191178-05:00"
     description: AWS node drainer for ASG spanning over multiple AZs - a workaround
       for a common pitfall https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas.
       Based on `kubectl rollout` CLI. Another option would be https://github.com/aws-samples/amazon-k8s-node-drainer.
@@ -12,4 +23,4 @@ entries:
     urls:
     - https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
     version: 1.0.0
-generated: 2019-09-10T13:45:15.761346-05:00
+generated: "2020-05-06T10:52:36.190419-05:00"
