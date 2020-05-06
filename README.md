@@ -12,7 +12,7 @@ More in https://chrisdodds.net/kubernetes-ec2-autoscaling-for-fun-and-profit/ on
 
 ### 3. Prerequisites - AWS InfraStructure Setup
 
-ASG must provide a lifecycle hook `kube-asg-node-drainer` to let the node drainer script complete the POD eviction:
+ASG must provide a lifecycle hook `kube-asg-node-drainer` to let the node drainer script notify ASG after completing the POD eviction:
 
 ```
 aws cloudformation deploy --template-file cf/lifecyclehook.yml --stack-name kube-asg-node-drainer-hook --parameter-overrides AsgName=<YOUR_ASG_NAME>
@@ -29,8 +29,38 @@ If a project uses [kube2iam](https://github.com/jtblin/kube2iam) one can use `ia
 
 `kube-asg-node-drainer` release must be installed to `kube-system` namespace: pods with system-node-critical priorityClass are not permitted in any other space.
 
+Option 1:
+
 ```
-helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-1.0.0.tgz
+helm upgrade --install --namespace kube-system kube-asg-node-drainer https://conservis.github.io/kube-asg-node-drainer/kube-asg-node-drainer-<version>.tgz
+```
+
+Option 2: 
+
+```
+helm repo add conservis https://conservis.github.io/kube-asg-node-drainer/
+helm install --name kube-asg-node-drainer --namespace kube-system conservis/kube-asg-node-drainer
+```
+
+| kube-asg-node-drainer version  | Kubernetes versions             | 
+|--------------------------------|---------------------------------|
+| 1.0.x                          | 1.15.x - 1.12.x                 |
+| 1.16.x                         | 1.16.x                          |
+
+
+### 5. Test
+How to test that things work:
+* decrease `Desired Capacity` of your ASG
+* some of the instances will be marked as `Terminating:Wait`
+* `kube-asg-node-drainer` will start gracefully evicting the pods
+* autoscaler will change `Desired Capacity` back to original value
+* pods will move from terminating instances to new ones
+
+During that period one can verify that the app didn't go down by something like:
+
+```
+while true; do date; curl <app_health_check>; echo ''; sleep 5; done
+
 ```
 
 ### History
@@ -39,16 +69,19 @@ https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudpro
 
 ```
 Cluster autoscaler does not support Auto Scaling Groups which span multiple Availability Zones;
-instead you should use an Auto Scaling Group for each Availability Zone and enable the --balance-similar-node-groups feature. 
+instead you should use an Auto Scaling Group for each Availability Zone 
+and enable the --balance-similar-node-groups feature. 
 If you do use a single Auto Scaling Group that spans multiple Availability Zones 
-you will find that AWS unexpectedly terminates nodes without them being drained because of the rebalancing feature.
+you will find that AWS unexpectedly terminates nodes without them being drained 
+because of the rebalancing feature.
 ```
 
 The official approach is kind of ugly and introduces more scaling and load-balancer complexity on the AWS side and is considered suboptimal. 
 
-Another approach is to have a life cycle hook which drains the nodes once the rebalancing occurs:
+Another approach is to have a life cycle hook which drains the nodes once the rebalancing occurs. Known implementations so far:
 * [AWS Lambda](https://github.com/aws-samples/amazon-k8s-node-drainer) solution
 * [Custom daemonset](https://github.com/kubernetes-incubator/kube-aws/blob/2f7e360421bc32c839e1acd31e8d0f082dfdab1e/builtin/files/userdata/cloud-config-controller#L2658)
+* https://github.com/rebuy-de/node-drainer
 
 Any of this solution will face the issue with draining node/evicting a pod because if a deployment has a single replica there still will be downtime to the app. PodDisruptionBudget won’t help in this case because of https://github.com/kubernetes/kubernetes/issues/66811. This limitation is best described in https://github.com/kubernetes/kubernetes/issues/66811#issuecomment-517219951. 
 

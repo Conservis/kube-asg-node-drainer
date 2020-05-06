@@ -2,10 +2,10 @@ apiVersion: rbac.authorization.k8s.io/v1
 kind: ClusterRole
 metadata:
   labels:
-    app: {{ template "name" . }}
-    release: {{ template "name" . }}
+    app: {{ template "kube-asg-node-drainer.name" . }}
+    release: {{ template "kube-asg-node-drainer.name" . }}
     heritage: "{{ .Release.Service }}"
-  name: {{ template "name" . }}
+  name: {{ template "kube-asg-node-drainer.name" . }}
   namespace: {{ .Release.Namespace}}
 rules:
   - apiGroups:

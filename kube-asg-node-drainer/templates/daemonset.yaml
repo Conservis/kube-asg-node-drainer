@@ -1,24 +1,23 @@
 # original file name kube-node-drainer-ds.yaml
+apiVersion: apps/v1
 kind: DaemonSet
-apiVersion: extensions/v1beta1
 metadata:
-  name: {{ template "name" . }}
-  namespace: {{ .Release.Namespace}}
-  labels:
-    k8s-app: {{ template "name" . }}
+  name: {{ template "kube-asg-node-drainer.name" . }}
+  labels: {{ include "kube-asg-node-drainer.labels" . | nindent 4 }}
 spec:
+  selector:
+    matchLabels: {{ include "kube-asg-node-drainer.matchLabels" . | nindent 6 }}
   updateStrategy:
     rollingUpdate:
       maxUnavailable: 100%
     type: RollingUpdate
   template:
     metadata:
-      labels:
-        k8s-app: {{ template "name" . }}
+      labels: {{ include "kube-asg-node-drainer.labels" . | nindent 8 }}
       annotations:
         scheduler.alpha.kubernetes.io/critical-pod: ''
     spec:
-      serviceAccountName: {{ template "name" . }}
+      serviceAccountName: {{ template "kube-asg-node-drainer.name" . }}
       priorityClassName: system-node-critical
       tolerations:
         - operator: Exists
@@ -36,7 +35,7 @@ spec:
                 fieldRef:
                   fieldPath: spec.nodeName
             - name: ASG_LIFECYCLE_HOOK_NAME
-              value: {{ template "name" . }}
+              value: {{ template "kube-asg-node-drainer.name" . }}
           command:
             - /usr/local/bin/node-drainer
           volumeMounts:
