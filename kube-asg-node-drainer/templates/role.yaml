@@ -36,7 +36,7 @@ rules:
       - watch
       - patch
   - apiGroups:
-      - "extensions"
+      - "apps"
     resources:
       - daemonsets
       - replicasets
@@ -45,7 +45,7 @@ rules:
       - get
       - list
   - apiGroups:
-      - "extensions"
+      - "apps"
     resources:
       - deployments
     verbs:
