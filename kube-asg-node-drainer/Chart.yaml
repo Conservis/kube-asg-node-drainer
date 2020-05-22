@@ -3,5 +3,5 @@ description: AWS node drainer for ASG spanning over multiple AZs -
   a workaround for a common pitfall https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas.
   Based on `kubectl rollout` CLI. Another option would be https://github.com/aws-samples/amazon-k8s-node-drainer.
 name: kube-asg-node-drainer
-version: 1.16.0
+version: 1.16.1
 appVersion: 1.16.0
