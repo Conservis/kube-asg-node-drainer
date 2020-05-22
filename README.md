@@ -65,27 +65,21 @@ while true; do date; curl <app_health_check>; echo ''; sleep 5; done
 
 ### History
 
-https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas, second notice:
+https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas, third comment:
 
 ```
-Cluster autoscaler does not support Auto Scaling Groups which span multiple Availability Zones;
-instead you should use an Auto Scaling Group for each Availability Zone 
-and enable the --balance-similar-node-groups feature. 
-If you do use a single Auto Scaling Group that spans multiple Availability Zones 
-you will find that AWS unexpectedly terminates nodes without them being drained 
-because of the rebalancing feature.
+On creation time, the ASG will have the AZRebalance process enabled, which means it will actively work to balance the number of instances between AZs, and possibly terminate instances. If your applications could be impacted from sudden termination, you can either suspend the AZRebalance feature, or use a tool for automatic draining upon ASG scale-in such as the [k8s-node-drainer]https://github.com/aws-samples/amazon-k8s-node-drainer.
 ```
 
-The official approach is kind of ugly and introduces more scaling and load-balancer complexity on the AWS side and is considered suboptimal. 
 
-Another approach is to have a life cycle hook which drains the nodes once the rebalancing occurs. Known implementations so far:
+As of 2020-05-22 known workaround solutions are:
 * [AWS Lambda](https://github.com/aws-samples/amazon-k8s-node-drainer) solution
-* [Custom daemonset](https://github.com/kubernetes-incubator/kube-aws/blob/2f7e360421bc32c839e1acd31e8d0f082dfdab1e/builtin/files/userdata/cloud-config-controller#L2658)
+* [Custom daemonset](https://github.com/kubernetes-incubator/kube-aws/blob/master/builtin/files/userdata/cloud-config-controller#L2671)
 * https://github.com/rebuy-de/node-drainer
 
-Any of this solution will face the issue with draining node/evicting a pod because if a deployment has a single replica there still will be downtime to the app. PodDisruptionBudget won’t help in this case because of https://github.com/kubernetes/kubernetes/issues/66811. This limitation is best described in https://github.com/kubernetes/kubernetes/issues/66811#issuecomment-517219951. 
+Any of this solution will face the issue while draining node/evicting a pod in a single-replica deployment and there still will be downtime to the app. PodDisruptionBudget won’t help in this case because of https://github.com/kubernetes/kubernetes/issues/66811. This limitation is best described in https://github.com/kubernetes/kubernetes/issues/66811#issuecomment-517219951. 
 
-Bottom line: As of today (August 20, 2019) the best solution we can provide is:
+Bottom line: As of today (2020-05-22) the best solution we can provide is:
 
 * cordon the node - `kubectl cordon <node>`
 * trigger restart for pods requiring graceful eviction - `kubectl rollout restart deployment/<deployment_name>`

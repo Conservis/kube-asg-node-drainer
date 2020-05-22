@@ -15,6 +15,8 @@ Create chart name and version as used by the chart label.
 
 {{/* Helm required labels */}}
 {{- define "kube-asg-node-drainer.labels" -}}
+app: {{ template "kube-asg-node-drainer.name" . }}
+release: {{ .Release.Name }}
 app.kubernetes.io/name: {{ template "kube-asg-node-drainer.name" . }}
 helm.sh/chart: {{ template "kube-asg-node-drainer.chart" . }}
 app.kubernetes.io/instance: {{ .Release.Name }}
