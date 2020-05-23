@@ -74,7 +74,7 @@ https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudpro
 On creation time, the ASG will have the AZRebalance process enabled, which means it will actively work 
 to balance the number of instances between AZs, and possibly terminate instances. If your applications 
 could be impacted from sudden termination, you can either suspend the AZRebalance feature, or use a tool 
-for automatic draining upon ASG scale-in such as the [k8s-node-drainer]https://github.com/aws-samples/amazon-k8s-node-drainer.
+for automatic draining upon ASG scale-in such as the https://github.com/aws-samples/amazon-k8s-node-drainer.
 ```
 
 
