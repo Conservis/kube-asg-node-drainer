@@ -71,10 +71,10 @@ while true; do date; curl <app_health_check>; echo ''; sleep 5; done
 https://github.com/kubernetes/autoscaler/tree/master/cluster-autoscaler/cloudprovider/aws#common-notes-and-gotchas, third comment:
 
 ```
-On creation time, the ASG will have the AZRebalance process enabled, which means it will actively work to balance 
-the number of instances between AZs, and possibly terminate instances. If your applications could be impacted 
-from sudden termination, you can either suspend the AZRebalance feature, or use a tool for automatic draining 
-upon ASG scale-in such as the [k8s-node-drainer]https://github.com/aws-samples/amazon-k8s-node-drainer.
+On creation time, the ASG will have the AZRebalance process enabled, which means it will actively work 
+to balance the number of instances between AZs, and possibly terminate instances. If your applications 
+could be impacted from sudden termination, you can either suspend the AZRebalance feature, or use a tool 
+for automatic draining upon ASG scale-in such as the [k8s-node-drainer]https://github.com/aws-samples/amazon-k8s-node-drainer.
 ```
 
 
