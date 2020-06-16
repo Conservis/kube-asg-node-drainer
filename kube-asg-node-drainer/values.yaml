@@ -1,3 +1,0 @@
-# Default values for chart.
-image: "conservis/kube-asg-node-drainer:1.16.0"
-iamRole: ""
